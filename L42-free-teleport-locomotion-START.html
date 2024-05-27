@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+    <title>Free teleport locomotion</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-extras@^6.1.0/dist/aframe-extras.min.js"></script>
+    <!-- <script src="https://unpkg.com/aframe-animation-component@^4.1.2/dist/aframe-animation-component.min.js"></script>  -->
+</head>
+
+<body>
+    <a-scene background="color: FFFFFF" inspector-plugin-recast>
+
+        <!-- Asset management -->
+        <a-assets>
+            <a-mixin id="red" material="color: red"></a-mixin>
+            <a-mixin id="blue" material="color: blue"></a-mixin>
+            <a-mixin id="cylinder" geometry="primitive: cylinder" radius="0.5"
+                      animation="property: scale;
+                                from:  1 1 1;
+                                to: 1.2 1.2 1.2;
+                                dur: 400;
+                                startEvents: click;"></a-mixin>
+            <a-asset-item id="navmesh" src="L42-ASSETs/navmesh.gltf"></a-asset-item>
+        </a-assets>
+
+        <!-- Camera Rig -->
+        <a-entity id="cam-rig" position="0 0 6">
+
+            <!-- Camera -->
+            <a-camera id="head">
+                <a-entity
+                    raycaster="objects: .clickable"
+                    cursor="fuse: true; fuseTimeout:2000"
+                    geometry="primitive:box; width:0.1; height:0.1; depth:0.1;"
+                    material="color:green"
+                    position="0 0 -2"
+                    animation__fusing="property:scale; from: 1 1 1; to: 0.1 0.1 0.1; startEvents:fusing;"
+                    animation__reset="property:scale; from: 0.1 0.1 0.1; to: 1 1 1; startEvents:mouseleave;"
+                >
+                </a-entity>
+            </a-camera>
+
+            <a-entity laser-controls="hand: right" raycaster="lineColor: orange; lineOpacity: 1"></a-entity>
+            <a-entity laser-controls="hand: left" raycaster="lineColor: orange; lineOpacity: 1"></a-entity>
+
+        </a-entity>
+        
+        <!-- Placeholders -->
+        <a-entity mixin="red cylinder" position="0 0.5 0" class="clickable"></a-entity>
+        <a-entity mixin="red cylinder" position="0 2.5 0" class="clickable"></a-entity>
+        <a-entity mixin="blue cylinder" position="0 1.5 0"></a-entity>
+
+        <a-entity mixin="blue cylinder" position="3 0.5 0"></a-entity>
+        <a-entity mixin="red cylinder" position="-3 0.5 0"></a-entity>
+        <a-entity mixin="blue cylinder" position="0 0.5 -4.5"></a-entity>
+
+        <!-- Ground -->
+        <a-plane color="#DDDDDD" shader="flat" rotation="-90 0 0" scale="8 16 1"></a-plane>
+
+        <!-- NavMesh -->
+        <a-entity id="ground" gltf-model="#navmesh" position="0 0.001 0" visible="false"></a-entity>
+        
+    </a-scene>
+
+    <script>
+        AFRAME.registerComponent('click-color-change', {
+            init: function () {
+                this.el.addEventListener('click', function () {
+                    const currentColor = this.getAttribute('material').color;
+                    this.setAttribute('animation__color', {
+                        property: 'material.color',
+                        from: currentColor,
+                        to: '#FFFF00', // yellow
+                        dur: 300
+                    });
+                    console.log(`Animation set from ${currentColor} to yellow`); // Debugging
+                });
+            }
+        });
+
+        // Apply the component to all clickable entities
+        document.querySelectorAll('.clickable').forEach(function (el) {
+            el.setAttribute('click-color-change', '');
+        });
+    </script>
+</body>
+</html>
